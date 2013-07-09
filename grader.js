@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 var fs = require('fs');
+var rest = require('restler');
 var program = require('commander');
 var cheerio = require('cheerio');
 var HTMLFILE_DEFAULT = "index.html";
@@ -50,10 +51,26 @@ if(require.main == module) {
 		CHECKFILE_DEFAULT)
         .option('-f,--file <html_file>','Path to index.html',clone(assertFileExists),
 		HTMLFILE_DEFAULT)
+	.option('-u, --url <url>','url to check')
         .parse(process.argv);
-    var checkJson = checkHtmlFile(program.file, program.checks);
-    var OutJson = JSON.stringify(checkJson,null,4);
-    console.log(OutJson);
+	
+    if(program.url){
+
+		var url_test = program.url;
+	        rest.get(url_test).on('complete',function(result){
+		    var html_test = result.toString();
+		    console.log(html_test);
+		    fs.writeFileSync('test.html',html_test);
+		    var checkJson_d = checkHtmlFile('test.html',program.checks);
+		    var OutJson_d = JSON.stringify(checkJson_d,null,4);
+		    console.log(OutJson_d);
+		    process.exit(1);
+		    });
+
+	}	
+    //var checkJson = checkHtmlFile(program.file, program.checks);
+    //var OutJson = JSON.stringify(checkJson,null,4);
+    //console.log(OutJson);
 }else {
     exports.checkHtmlFile = checkHtmlFile;
 }
